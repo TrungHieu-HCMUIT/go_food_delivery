@@ -34,65 +34,8 @@ func runService(db *gorm.DB) error {
 	restaurants := r.Group("/restaurants")
 	{
 		restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
-
-		restaurants.GET("/:id", func(context *gin.Context) {
-			id, err := strconv.Atoi(context.Param("id"))
-
-			if err != nil {
-				context.JSON(http.StatusUnauthorized, gin.H{
-					"error": err.Error(),
-				})
-
-				return
-			}
-
-			var data Restaurant
-
-			if err := db.Table(Restaurant{}.TableName()).
-				Where("id = ?", id).
-				First(&data).Error; err != nil {
-				context.JSON(http.StatusUnauthorized, gin.H{
-					"error": err.Error(),
-				})
-
-				return
-			}
-
-			context.JSON(http.StatusOK, data)
-		})
-
-		restaurants.GET("", func(context *gin.Context) {
-			var data []Restaurant
-
-			type Filter struct {
-				CityId int `json:"city_id" form:"city_id"`
-			}
-
-			var filter Filter
-
-			if err := context.ShouldBind(&filter); err != nil {
-				context.JSON(http.StatusUnauthorized, gin.H{
-					"error": err.Error(),
-				})
-
-				return
-			}
-
-			newDb := db
-			if filter.CityId > 0 {
-				newDb = db.Where("city_id = ?", filter.CityId)
-			}
-
-			if err := newDb.Find(&data).Error; err != nil {
-				context.JSON(http.StatusUnauthorized, gin.H{
-					"error": err.Error(),
-				})
-
-				return
-			}
-
-			context.JSON(http.StatusOK, data)
-		})
+		restaurants.GET("/:id", ginrestaurant.GetRestaurant(appCtx))
+		restaurants.GET("", ginrestaurant.ListRestaurant(appCtx))
 
 		restaurants.PATCH("/:id", func(context *gin.Context) {
 			id, err := strconv.Atoi(context.Param("id"))
@@ -153,15 +96,5 @@ type RestaurantUpdate struct {
 }
 
 func (RestaurantUpdate) TableName() string {
-	return Restaurant{}.TableName()
-}
-
-type RestaurantCreate struct {
-	Id   int    `json:"id" gorm:"column:id;"`
-	Name string `json:"name" gorm:"column:name;"`
-	Addr string `json:"address" gorm:"column:addr;"`
-}
-
-func (RestaurantCreate) TableName() string {
 	return Restaurant{}.TableName()
 }

@@ -5,26 +5,27 @@ import (
 	"go_restaurant/common"
 	"go_restaurant/component"
 	"go_restaurant/modules/restaurant/restaurantbusiness"
-	"go_restaurant/modules/restaurant/restaurantmodel"
 	"go_restaurant/modules/restaurant/restaurantstorage"
 	"net/http"
+	"strconv"
 )
 
-func CreateRestaurant(ctx component.AppContext) gin.HandlerFunc {
+func GetRestaurant(appCtx component.AppContext) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		var data restaurantmodel.RestaurantCreate
+		id, err := strconv.Atoi(context.Param("id"))
 
-		if err := context.ShouldBind(&data); err != nil {
+		if err != nil {
 			context.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
 
-		store := restaurantstorage.NewSqlStorage(ctx.GetMainDBConnection())
-		business := restaurantbusiness.NewCreateRestaurantBusiness(store)
+		store := restaurantstorage.NewSqlStorage(appCtx.GetMainDBConnection())
+		business := restaurantbusiness.NewGetRestaurantBusiness(store)
 
-		if err := business.CreateRestaurant(context.Request.Context(), &data); err != nil {
+		data, err := business.GetRestaurantById(context, id)
+		if err != nil {
 			context.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error(),
 			})
