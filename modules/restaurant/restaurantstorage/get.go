@@ -3,7 +3,6 @@ package restaurantstorage
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go_restaurant/modules/restaurant/restaurantmodel"
 )
 
@@ -18,8 +17,6 @@ func (s *sqlStorage) GetRestaurant(ctx context.Context, id int) (restaurantmodel
 		Find(&data).Error; err != nil {
 		return data, err
 	}
-
-	fmt.Println(data)
 
 	if data.Id == 0 {
 		return data, errors.New("record not found")
