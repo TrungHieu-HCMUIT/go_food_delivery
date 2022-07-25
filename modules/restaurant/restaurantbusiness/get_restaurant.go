@@ -2,7 +2,7 @@ package restaurantbusiness
 
 import (
 	"context"
-	"errors"
+	"go_restaurant/common"
 	"go_restaurant/modules/restaurant/restaurantmodel"
 )
 
@@ -25,11 +25,14 @@ func NewGetRestaurantBusiness(storage GetRestaurantStorage) *getRestaurantBusine
 func (biz getRestaurantBusiness) GetRestaurantById(ctx context.Context, id int) (*restaurantmodel.Restaurant, error) {
 	restaurant, err := biz.store.FindDataByConditions(ctx, map[string]interface{}{"id": id})
 	if err != nil {
-		return nil, err
+		if err != common.RecordNotFound {
+			return nil, common.ErrCannotGetEntity(restaurantmodel.EntityName, err)
+		}
+		return nil, common.ErrCannotGetEntity(restaurantmodel.EntityName, err)
 	}
 
 	if restaurant.Status == 0 {
-		return nil, errors.New("data deleted")
+		return nil, common.ErrEntityDeleted(restaurantmodel.EntityName, nil)
 	}
 
 	return restaurant, nil
