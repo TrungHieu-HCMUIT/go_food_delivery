@@ -2,11 +2,16 @@ package restaurantbusiness
 
 import (
 	"context"
+	"errors"
 	"go_restaurant/modules/restaurant/restaurantmodel"
 )
 
 type GetRestaurantStorage interface {
-	GetRestaurant(ctx context.Context, id int) (restaurantmodel.Restaurant, error)
+	FindDataByConditions(
+		ctx context.Context,
+		conditions map[string]interface{},
+		moreKeys ...string,
+	) (*restaurantmodel.Restaurant, error)
 }
 
 type getRestaurantBusiness struct {
@@ -17,10 +22,14 @@ func NewGetRestaurantBusiness(storage GetRestaurantStorage) *getRestaurantBusine
 	return &getRestaurantBusiness{store: storage}
 }
 
-func (biz getRestaurantBusiness) GetRestaurantById(ctx context.Context, id int) (restaurantmodel.Restaurant, error) {
-	restaurant, err := biz.store.GetRestaurant(ctx, id)
+func (biz getRestaurantBusiness) GetRestaurantById(ctx context.Context, id int) (*restaurantmodel.Restaurant, error) {
+	restaurant, err := biz.store.FindDataByConditions(ctx, map[string]interface{}{"id": id})
 	if err != nil {
-		return restaurantmodel.Restaurant{}, err
+		return nil, err
+	}
+
+	if restaurant.Status == 0 {
+		return nil, errors.New("data deleted")
 	}
 
 	return restaurant, nil
