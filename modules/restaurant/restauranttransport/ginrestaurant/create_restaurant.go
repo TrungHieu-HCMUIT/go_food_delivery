@@ -15,10 +15,7 @@ func CreateRestaurant(ctx component.AppContext) gin.HandlerFunc {
 		var data restaurantmodel.RestaurantCreate
 
 		if err := context.ShouldBind(&data); err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		store := restaurantstorage.NewSqlStorage(ctx.GetMainDBConnection())

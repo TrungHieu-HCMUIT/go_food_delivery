@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"go_restaurant/component"
+	"go_restaurant/middleware"
 	"go_restaurant/modules/restaurant/restauranttransport/ginrestaurant"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -28,6 +29,7 @@ func runService(db *gorm.DB) error {
 	r := gin.Default()
 
 	appCtx := component.NewAppContext(db)
+	r.Use(middleware.Recover(appCtx))
 
 	restaurants := r.Group("/restaurants")
 	{

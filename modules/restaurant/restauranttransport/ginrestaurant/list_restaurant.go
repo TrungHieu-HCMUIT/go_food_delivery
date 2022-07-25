@@ -14,10 +14,7 @@ func ListRestaurant(ctx component.AppContext) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var filter restaurantmodel.Filter
 		if err := context.ShouldBind(&filter); err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		var paging common.Paging
