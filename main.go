@@ -7,7 +7,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -36,17 +35,7 @@ func runService(db *gorm.DB) error {
 		restaurants.GET("/:id", ginrestaurant.GetRestaurant(appCtx))
 		restaurants.GET("", ginrestaurant.ListRestaurant(appCtx))
 		restaurants.PATCH("/:id", ginrestaurant.UpdateRestaurant(appCtx))
-
-		restaurants.DELETE("", func(context *gin.Context) {
-			if err := db.Table(Restaurant{}.TableName()).Where("status = 1").Delete(nil).Error; err != nil {
-				context.JSON(http.StatusUnauthorized, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-
-			context.JSON(http.StatusOK, gin.H{"ok": 1})
-		})
+		restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
 	}
 
 	return r.Run()
