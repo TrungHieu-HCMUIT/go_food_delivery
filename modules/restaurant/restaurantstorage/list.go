@@ -32,8 +32,18 @@ func (s *sqlStorage) ListDataByConditions(ctx context.Context,
 		return nil, common.ErrDB(err)
 	}
 
+	// Optimize offset
+	if paging.FakeCursor != "" {
+		if uid, err := common.FromBase58(paging.FakeCursor); err == nil {
+			// Because we sort desc so we use <
+			db = db.Where("id < ?", uid.GetLocalID())
+		} else {
+			db = db.
+				Offset((paging.Page - 1) * paging.Limit)
+		}
+	}
+
 	if err := db.
-		Offset((paging.Page - 1) * paging.Limit).
 		Limit(paging.Limit).
 		Order("id desc").
 		Find(&results).Error; err != nil {
