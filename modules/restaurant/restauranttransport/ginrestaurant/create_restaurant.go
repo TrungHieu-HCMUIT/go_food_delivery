@@ -22,12 +22,11 @@ func CreateRestaurant(ctx component.AppContext) gin.HandlerFunc {
 		business := restaurantbusiness.NewCreateRestaurantBusiness(store)
 
 		if err := business.CreateRestaurant(context.Request.Context(), &data); err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(err)
 		}
 
-		context.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
+		data.Mask(false)
+
+		context.JSON(http.StatusOK, common.SimpleSuccessResponse(data.FakeId.String()))
 	}
 }

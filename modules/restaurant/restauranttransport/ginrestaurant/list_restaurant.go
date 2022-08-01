@@ -19,10 +19,7 @@ func ListRestaurant(ctx component.AppContext) gin.HandlerFunc {
 
 		var paging common.Paging
 		if err := context.ShouldBind(&paging); err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		paging.Fulfill()
@@ -30,14 +27,15 @@ func ListRestaurant(ctx component.AppContext) gin.HandlerFunc {
 		store := restaurantstorage.NewSqlStorage(ctx.GetMainDBConnection())
 		business := restaurantbusiness.NewListRestaurantBusiness(store)
 
-		data, err := business.ListRestaurant(context.Request.Context(), &filter, &paging)
+		result, err := business.ListRestaurant(context.Request.Context(), &filter, &paging)
 		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(err)
 		}
 
-		context.JSON(http.StatusOK, common.NewSuccessResponse(data, paging, filter))
+		for i := range result {
+			result[i].Mask(false)
+		}
+
+		context.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filter))
 	}
 }

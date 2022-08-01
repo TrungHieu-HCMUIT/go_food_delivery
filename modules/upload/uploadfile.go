@@ -1,0 +1,23 @@
+package upload
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"go_restaurant/common"
+	"go_restaurant/component"
+	"net/http"
+)
+
+func Upload(ctx component.AppContext) func(*gin.Context) {
+	return func(c *gin.Context) {
+		fileHeader, err := c.FormFile("file")
+
+		if err != nil {
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		c.SaveUploadedFile(fileHeader, fmt.Sprintf("./static/%s", fileHeader.Filename))
+
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
+	}
+}

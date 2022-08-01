@@ -5,6 +5,7 @@ import (
 	"go_restaurant/component"
 	"go_restaurant/middleware"
 	"go_restaurant/modules/restaurant/restauranttransport/ginrestaurant"
+	"go_restaurant/modules/upload"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -30,6 +31,8 @@ func runService(db *gorm.DB) error {
 
 	appCtx := component.NewAppContext(db)
 	r.Use(middleware.Recover(appCtx))
+
+	r.POST("/upload", upload.Upload(appCtx))
 
 	restaurants := r.Group("/restaurants")
 	{
