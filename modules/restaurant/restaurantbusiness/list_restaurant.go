@@ -4,6 +4,7 @@ import (
 	"context"
 	"go_restaurant/common"
 	"go_restaurant/modules/restaurant/restaurantmodel"
+	"log"
 )
 
 type ListRestaurantStorage interface {
@@ -16,12 +17,17 @@ type ListRestaurantStorage interface {
 	) ([]restaurantmodel.Restaurant, error)
 }
 
-type listRestaurantBusiness struct {
-	store ListRestaurantStorage
+type ListRestaurantLikeStorage interface {
+	GetRestaurantLikes(ctx context.Context, ids []int) (map[int]int, error)
 }
 
-func NewListRestaurantBusiness(store ListRestaurantStorage) *listRestaurantBusiness {
-	return &listRestaurantBusiness{store: store}
+type listRestaurantBusiness struct {
+	store     ListRestaurantStorage
+	likeStore ListRestaurantLikeStorage
+}
+
+func NewListRestaurantBusiness(store ListRestaurantStorage, likeStore ListRestaurantLikeStorage) *listRestaurantBusiness {
+	return &listRestaurantBusiness{store: store, likeStore: likeStore}
 }
 
 func (biz *listRestaurantBusiness) ListRestaurant(
@@ -30,5 +36,28 @@ func (biz *listRestaurantBusiness) ListRestaurant(
 	paging *common.Paging,
 ) ([]restaurantmodel.Restaurant, error) {
 	result, err := biz.store.ListDataByConditions(ctx, nil, filter, paging)
-	return result, err
+
+	if err != nil {
+		return nil, common.ErrCannotListEntity(restaurantmodel.EntityName, err)
+	}
+
+	ids := make([]int, len(result))
+
+	for i := range result {
+		ids[i] = result[i].Id
+	}
+
+	mapResLike, err := biz.likeStore.GetRestaurantLikes(ctx, ids)
+
+	if err != nil {
+		log.Println("Cannot get list restaurant: ", err)
+	}
+
+	if m := mapResLike; m != nil {
+		for i, restaurant := range result {
+			result[i].LikedCount = mapResLike[restaurant.Id]
+		}
+	}
+
+	return result, nil
 }

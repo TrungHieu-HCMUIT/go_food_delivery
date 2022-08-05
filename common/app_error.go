@@ -105,6 +105,14 @@ func ErrCannotGetEntity(entity string, err error) *AppError {
 	)
 }
 
+func ErrCannotListEntity(entity string, err error) *AppError {
+	return NewCustomError(
+		err,
+		fmt.Sprintf("Cannot list %s", strings.ToLower(entity)),
+		fmt.Sprintf("ErrCannotList%s", entity),
+	)
+}
+
 func ErrCannotDeleteEntity(entity string, err error) *AppError {
 	return NewCustomError(
 		err,

@@ -34,13 +34,13 @@ func (s *sqlStorage) ListDataByConditions(ctx context.Context,
 
 	// Optimize offset
 	if paging.FakeCursor != "" {
-		if uid, err := common.FromBase58(paging.FakeCursor); err == nil {
+		if uid, err := common.FromBase58(paging.FakeCursor); err != nil {
 			// Because we sort desc so we use <
 			db = db.Where("id < ?", uid.GetLocalID())
-		} else {
-			db = db.
-				Offset((paging.Page - 1) * paging.Limit)
 		}
+	} else {
+		db = db.
+			Offset((paging.Page - 1) * paging.Limit)
 	}
 
 	if err := db.
