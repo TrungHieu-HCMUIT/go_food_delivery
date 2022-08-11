@@ -17,3 +17,7 @@ type UserCreate struct {
 func (UserCreate) TableName() string {
 	return User{}.TableName()
 }
+
+func (u *UserCreate) Mask(isAdminOrOwner bool) {
+	u.GenUID(common.DbTypeUser)
+}
