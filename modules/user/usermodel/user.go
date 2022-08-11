@@ -19,6 +19,22 @@ type User struct {
 	Avatar          *common.Image `json:"avatar,omitempty" gorm:"column:avatar;type:json"`
 }
 
+func (u *User) Mask(isAdminOrOwner bool) {
+	u.GenUID(common.DbTypeUser)
+}
+
+func (u *User) GetUserId() int {
+	return u.Id
+}
+
+func (u *User) GetEmail() string {
+	return u.Email
+}
+
+func (u *User) GetRole() string {
+	return u.Role
+}
+
 func (User) TableName() string {
 	return "users"
 }

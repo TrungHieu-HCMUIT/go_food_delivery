@@ -144,3 +144,11 @@ func ErrEntityDeleted(entity string, err error) *AppError {
 		fmt.Sprintf("Err%sDeleted", entity),
 	)
 }
+
+func ErrNoPermission(err error) *AppError {
+	return NewCustomError(
+		err,
+		fmt.Sprintf("You have no permission"),
+		fmt.Sprintf("ErrNoPermission"),
+	)
+}

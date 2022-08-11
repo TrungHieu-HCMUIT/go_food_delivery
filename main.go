@@ -41,14 +41,15 @@ func runService(db *gorm.DB, secretKey string) error {
 
 	v1.POST("/register", ginuser.Register(appCtx))
 	v1.POST("/login", ginuser.Login(appCtx))
+	v1.GET("/profile", middleware.RequiredAuth(appCtx), ginuser.GetProfile(appCtx))
 
 	restaurants := v1.Group("/restaurants")
 	{
-		restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
-		restaurants.GET("/:id", ginrestaurant.GetRestaurant(appCtx))
-		restaurants.GET("", ginrestaurant.ListRestaurant(appCtx))
-		restaurants.PATCH("/:id", ginrestaurant.UpdateRestaurant(appCtx))
-		restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
+		restaurants.POST("", middleware.RequiredAuth(appCtx), ginrestaurant.CreateRestaurant(appCtx))
+		restaurants.GET("/:id", middleware.RequiredAuth(appCtx), ginrestaurant.GetRestaurant(appCtx))
+		restaurants.GET("", middleware.RequiredAuth(appCtx), ginrestaurant.ListRestaurant(appCtx))
+		restaurants.PATCH("/:id", middleware.RequiredAuth(appCtx), ginrestaurant.UpdateRestaurant(appCtx))
+		restaurants.DELETE("/:id", middleware.RequiredAuth(appCtx), ginrestaurant.DeleteRestaurant(appCtx))
 	}
 
 	return r.Run()
