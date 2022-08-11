@@ -15,6 +15,7 @@ import (
 
 func main() {
 	dsn := os.Getenv("DBConnectionStr")
+	secretKey := os.Getenv("SystemSecretKey")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
@@ -22,22 +23,26 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if err := runService(db); err != nil {
+	if err := runService(db, secretKey); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func runService(db *gorm.DB) error {
+func runService(db *gorm.DB, secretKey string) error {
 	r := gin.Default()
 
-	appCtx := component.NewAppContext(db)
-	r.Use(middleware.Recover(appCtx))
+	appCtx := component.NewAppContext(db, secretKey)
 
-	r.POST("/upload", upload.Upload(appCtx))
+	v1 := r.Group("/v1")
 
-	r.POST("/register", ginuser.Register(appCtx))
+	v1.Use(middleware.Recover(appCtx))
 
-	restaurants := r.Group("/restaurants")
+	v1.POST("/upload", upload.Upload(appCtx))
+
+	v1.POST("/register", ginuser.Register(appCtx))
+	v1.POST("/login", ginuser.Login(appCtx))
+
+	restaurants := v1.Group("/restaurants")
 	{
 		restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
 		restaurants.GET("/:id", ginrestaurant.GetRestaurant(appCtx))
