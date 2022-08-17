@@ -6,7 +6,8 @@ import (
 	"go_restaurant/modules/restaurant/restaurantmodel"
 )
 
-func (s *sqlStorage) ListDataByConditions(ctx context.Context,
+func (s *sqlStorage) ListDataByConditions(
+	ctx context.Context,
 	conditions map[string]interface{},
 	filter *restaurantmodel.Filter,
 	paging *common.Paging,
@@ -15,10 +16,6 @@ func (s *sqlStorage) ListDataByConditions(ctx context.Context,
 	var results []restaurantmodel.Restaurant
 
 	db := s.db
-
-	for i := range moreKeys {
-		db = db.Preload(moreKeys[i])
-	}
 
 	db = db.Table(restaurantmodel.Restaurant{}.TableName()).Where(conditions).Where("status in (1)")
 
@@ -30,6 +27,10 @@ func (s *sqlStorage) ListDataByConditions(ctx context.Context,
 
 	if err := db.Count(&paging.Total).Error; err != nil {
 		return nil, common.ErrDB(err)
+	}
+
+	for i := range moreKeys {
+		db = db.Preload(moreKeys[i])
 	}
 
 	// Optimize offset

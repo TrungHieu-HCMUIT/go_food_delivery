@@ -23,7 +23,7 @@ func NewGetRestaurantBusiness(storage GetRestaurantStorage) *getRestaurantBusine
 }
 
 func (biz getRestaurantBusiness) GetRestaurantById(ctx context.Context, id int) (*restaurantmodel.Restaurant, error) {
-	restaurant, err := biz.store.FindDataByConditions(ctx, map[string]interface{}{"id": id})
+	restaurant, err := biz.store.FindDataByConditions(ctx, map[string]interface{}{"id": id}, "User")
 	if err != nil {
 		if err != common.RecordNotFound {
 			return nil, common.ErrCannotGetEntity(restaurantmodel.EntityName, err)

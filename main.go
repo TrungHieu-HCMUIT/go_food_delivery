@@ -23,6 +23,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	db = db.Debug()
+
 	if err := runService(db, secretKey); err != nil {
 		log.Fatalln(err)
 	}
