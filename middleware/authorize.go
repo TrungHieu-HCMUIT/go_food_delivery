@@ -30,8 +30,8 @@ func ErrWrongAuthHeader(err error) *common.AppError {
 }
 
 func extractTokenFromHeader(s string) (string, error) {
-	parts := strings.Split(s, " ")
 	//"Authorization": "Bearer {token}"
+	parts := strings.Split(s, " ")
 
 	if parts[0] != "Bearer" || len(parts) < 2 || strings.TrimSpace(parts[1]) == "" {
 		return "", ErrWrongAuthHeader(errors.New("wrong authentication header"))
@@ -41,7 +41,7 @@ func extractTokenFromHeader(s string) (string, error) {
 }
 
 func RequiredAuth(appCtx component.AppContext) gin.HandlerFunc {
-	tokProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
+	tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
 	return func(c *gin.Context) {
 
 		token, err := extractTokenFromHeader(c.GetHeader("Authorization"))
@@ -53,7 +53,7 @@ func RequiredAuth(appCtx component.AppContext) gin.HandlerFunc {
 		db := appCtx.GetMainDBConnection()
 		store := userstorage.NewSqlStorage(db)
 
-		payload, err := tokProvider.Validate(token)
+		payload, err := tokenProvider.Validate(token)
 		if err != nil {
 			panic(err)
 		}
